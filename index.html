@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Living Codes Lab</title>
+<meta name="description" content="Living Codes Lab — the research group of Erik Garrison at the University of Tennessee Health Science Center. We build new representations of living systems: genomes, populations, and the process of science itself.">
+<meta property="og:title" content="Living Codes Lab">
+<meta property="og:description" content="We build new representations of living systems — genomes, populations, and the process of science itself — and follow where they lead.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://living.codes/">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M4.5 12 H19.5' stroke='%235eead4' stroke-width='1.8' stroke-linecap='round' fill='none'/><path d='M9 12 Q12 5.5 15 12' stroke='%23b79bf5' stroke-width='1.8' stroke-linecap='round' fill='none'/><circle cx='4.5' cy='12' r='2.6' fill='%235eead4'/><circle cx='19.5' cy='12' r='2.6' fill='none' stroke='%235eead4' stroke-width='1.8'/><circle cx='19.5' cy='12' r='1' fill='%235eead4'/><circle cx='9' cy='12' r='1.7' fill='%230a0d0f'/><circle cx='15' cy='12' r='1.7' fill='%230a0d0f'/></svg>">
+<link rel="alternate icon" type="image/jpeg" href="assets/ekg.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script>
+/* theme: auto (system) -> dark -> light, persisted, no flash */
+(function () {
+  try {
+    var t = localStorage.getItem('lc-theme');
+    if (t === 'dark' || t === 'light' || t === 'auto') {
+      document.documentElement.dataset.theme = t;
+    }
+  } catch (e) {}
+})();
+</script>
+<style>
+  /* ---------- tokens ---------- */
+  :root {
+    --bg: #f6f5f0;
+    --bg-2: #eeece3;
+    --surface: #fffdf8;
+    --surface-2: #f2f0e8;
+    --border: #ded9cb;
+    --border-2: #cfc9b8;
+    --fg: #1d2220;
+    --dim: #55605d;
+    --muted: #6a706c;
+    --accent: oklch(0.5 0.1 195);
+    --accent-bright: oklch(0.42 0.09 195);
+    --accent-soft: oklch(0.5 0.1 195 / 0.12);
+    --violet: oklch(0.46 0.16 310);
+    --violet-soft: oklch(0.46 0.16 310 / 0.14);
+    --code-bg: #eceae0;
+
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    --serif: 'Fraunces', 'Iowan Old Style', Georgia, serif;
+    --maxw: 68rem;
+    --pad: clamp(1.1rem, 4vw, 2.5rem);
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0a0d0f;
+    --bg-2: #0d1114;
+    --surface: #10161a;
+    --surface-2: #141b20;
+    --border: #1d252b;
+    --border-2: #2b363e;
+    --fg: #d6e0de;
+    --dim: #8fa09f;
+    --muted: #6d7e80;
+    --accent: oklch(0.82 0.12 185);
+    --accent-bright: oklch(0.88 0.11 185);
+    --accent-soft: oklch(0.82 0.12 185 / 0.1);
+    --violet: oklch(0.76 0.13 310);
+    --violet-soft: oklch(0.76 0.13 310 / 0.14);
+    --code-bg: #0e1418;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0a0d0f;
+      --bg-2: #0d1114;
+      --surface: #10161a;
+      --surface-2: #141b20;
+      --border: #1d252b;
+      --border-2: #2b363e;
+      --fg: #d6e0de;
+      --dim: #8fa09f;
+      --muted: #6d7e80;
+      --accent: oklch(0.82 0.12 185);
+      --accent-bright: oklch(0.88 0.11 185);
+      --accent-soft: oklch(0.82 0.12 185 / 0.1);
+      --violet: oklch(0.76 0.13 310);
+      --violet-soft: oklch(0.76 0.13 310 / 0.14);
+      --code-bg: #0e1418;
+    }
+  }
+
+  /* ---------- base ---------- */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: var(--bg); scroll-behavior: smooth; }
+  body {
+    font-family: var(--mono);
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 15px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  ::selection { background: var(--accent-soft); }
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+    transition: color .2s, border-color .2s;
+  }
+  a:hover { color: var(--accent-bright); border-color: var(--accent); }
+
+  h1, h2, h3 { font-weight: 400; }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--pad); }
+
+  /* ---------- header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .bar {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; padding: .55rem 0;
+  }
+  .brand {
+    display: flex; align-items: center; gap: .6rem;
+    color: var(--fg); border: none; font-family: var(--mono);
+    font-size: .82rem; letter-spacing: .08em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .brand svg { width: 22px; height: 22px; flex: none; }
+  .brand .name b { font-weight: 600; color: var(--dim); }
+  nav { display: flex; align-items: center; gap: 1.1rem; font-size: .82rem; }
+  nav a { color: var(--dim); border: none; }
+  nav a:hover { color: var(--accent); }
+  nav a.active { color: var(--fg); }
+  #themeBtn {
+    background: none; border: 1px solid var(--border); color: var(--dim);
+    font-family: var(--mono); font-size: .78rem; line-height: 1;
+    padding: .42em .6em; border-radius: .5em; cursor: pointer;
+    transition: color .2s, border-color .2s;
+    min-width: 2.6em;
+  }
+  #themeBtn:hover { color: var(--accent); border-color: var(--border-2); }
+  @media (max-width: 640px) {
+    nav a.hide-s { display: none; }
+  }
+
+  /* ---------- hero ---------- */
+  .hero { padding: clamp(3rem, 9vh, 6rem) 0 0; }
+  .kicker {
+    font-size: .78rem; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 1.4rem;
+  }
+  .kicker b { color: var(--accent); font-weight: 500; }
+  h1.display {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 340;
+    font-size: clamp(2.9rem, 8.5vw, 5.6rem);
+    line-height: 1.02;
+    letter-spacing: -.015em;
+    margin-bottom: 1.6rem;
+  }
+  h1.display .t { color: var(--accent); }
+  h1.display .v { color: var(--violet); }
+  .hero p.lede {
+    max-width: 58ch; font-size: 1rem; color: var(--dim);
+    margin-bottom: 1.2rem;
+  }
+  .hero p.lede strong { color: var(--fg); font-weight: 500; }
+  .affil {
+    font-size: .78rem; color: var(--muted); margin-bottom: 2.4rem;
+  }
+  .affil a { color: var(--dim); border-bottom-color: var(--border-2); }
+  .affil .dot::before { content: ' · '; color: var(--muted); }
+
+  .graphbox { margin: 0 0 1rem; }
+  .graphbox svg { width: 100%; height: auto; display: block; }
+  .graphbox .cap {
+    font-size: .72rem; color: var(--muted); letter-spacing: .06em;
+    padding: .5rem 0 3.6rem;
+  }
+
+  /* graph colors adapt to theme via CSS vars */
+  .g-backbone { stroke: var(--accent); stroke-width: 1.6; fill: none; stroke-linecap: round; }
+  .g-bubble { stroke: var(--violet); stroke-width: 1.6; fill: none; stroke-linecap: round; opacity: .85; }
+  .g-bubble2 { fill: var(--violet-soft); }
+  .g-node { fill: var(--surface); stroke: var(--border-2); stroke-width: 1.2; }
+  .g-letter { font-family: var(--mono); font-size: 8.5px; fill: var(--muted); }
+  .g-head { fill: var(--accent); }
+  @media (prefers-reduced-motion: no-preference) {
+    .g-bubble { animation: breathe 7s ease-in-out infinite alternate; }
+    .g-bubble:nth-of-type(2) { animation-delay: -3.5s; }
+    .g-head { offset-path: path('M30 90 H610'); animation: travel 22s linear infinite; }
+    @keyframes breathe { from { opacity: .55; } to { opacity: .95; } }
+    @keyframes travel { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+  }
+
+  /* ---------- sections ---------- */
+  section { border-top: 1px solid var(--border); padding: clamp(2.6rem, 7vw, 4.6rem) 0; }
+  .slabel {
+    font-size: .74rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 1.5rem;
+  }
+  .slabel b { color: var(--accent); font-weight: 500; }
+  h2 {
+    font-family: var(--serif); font-weight: 380;
+    font-size: clamp(1.7rem, 4vw, 2.5rem); line-height: 1.15;
+    letter-spacing: -.01em; margin-bottom: 1.4rem; max-width: 22ch;
+  }
+  h2 em { font-style: italic; color: var(--accent); }
+  .prose { max-width: 64ch; color: var(--dim); }
+  .prose p + p { margin-top: 1em; }
+  .prose strong { color: var(--fg); font-weight: 500; }
+  .prose .q {
+    border-left: 2px solid var(--accent);
+    padding-left: 1.1rem; margin: 1.6em 0;
+    font-family: var(--serif); font-style: italic; font-size: 1.15rem;
+    color: var(--fg); line-height: 1.5;
+  }
+
+  /* chain timeline */
+  .chain { margin: 2.4rem 0 0; }
+  .chain-row {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: .4rem 1.6rem;
+    padding: .85rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .chain-row:last-child { border-bottom: 1px solid var(--border); }
+  .chain-when { color: var(--muted); font-size: .78rem; padding-top: .12em; white-space: nowrap; }
+  .chain-what { line-height: 1.6; }
+  .chain-what .name { color: var(--fg); font-weight: 600; }
+  .chain-what .name a { color: var(--fg); border-bottom-color: var(--border-2); }
+  .chain-what .name a:hover { color: var(--accent); border-color: var(--accent); }
+  .chain-what .rule { color: var(--dim); }
+  .chain-what .old { text-decoration: line-through; text-decoration-color: color-mix(in oklab, var(--violet) 60%, transparent); color: var(--muted); }
+  @media (max-width: 560px) {
+    .chain-row { grid-template-columns: 1fr; gap: .1rem; }
+  }
+  .scales {
+    margin-top: 2rem; padding: 1.2rem 1.4rem;
+    border: 1px solid var(--border); border-radius: .6rem;
+    background: var(--surface);
+    font-size: .9rem; color: var(--dim);
+    max-width: 64ch;
+  }
+  .scales .seq { color: var(--accent); font-weight: 500; }
+  .scales .seq i { color: var(--muted); font-style: normal; padding: 0 .25em; }
+  .scales strong { color: var(--fg); font-weight: 500; }
+
+  /* direction blocks */
+  .dir { border-top: 1px solid var(--border); padding: 2rem 0 2.6rem; }
+  .dir:first-of-type { border-top: none; padding-top: .4rem; }
+  .dir-head { display: flex; align-items: baseline; gap: 1rem; margin-bottom: .8rem; }
+  .dir-head .tag { font-size: .74rem; color: var(--violet); letter-spacing: .1em; }
+  h3 {
+    font-family: var(--serif); font-weight: 400;
+    font-size: clamp(1.25rem, 2.6vw, 1.6rem); letter-spacing: -.005em;
+  }
+  .dir .prose { font-size: .92rem; }
+  .dir .links {
+    margin-top: 1rem; font-size: .8rem; color: var(--muted);
+    display: flex; flex-wrap: wrap; gap: .4rem 1.4rem;
+  }
+  .dir .links a { color: var(--dim); border-bottom-color: var(--border-2); }
+  .dir .links a:hover { color: var(--accent); }
+  .dir .links .lk::after { content: ' →'; }
+
+  /* findings */
+  .pub { border-top: 1px solid var(--border); padding: .8rem 0; }
+  .pub:last-of-type { border-bottom: 1px solid var(--border); }
+  .pub .row1 { display: flex; flex-wrap: wrap; gap: .2rem 1rem; align-items: baseline; }
+  .pub .t { font-family: var(--serif); font-size: 1.02rem; line-height: 1.45; color: var(--fg); flex: 1 1 30ch; }
+  .pub .t a { color: inherit; }
+  .pub .t a:hover { color: var(--accent); }
+  .pub .venue { font-size: .74rem; color: var(--accent); white-space: nowrap; }
+  .pub .venue .yr { color: var(--muted); }
+  .pub .role { font-size: .74rem; color: var(--muted); margin-top: .15rem; }
+  .pub-note { margin-top: 1.2rem; font-size: .8rem; color: var(--muted); }
+  .pub-note a { color: var(--dim); }
+
+  /* tools grid */
+  .tools {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: .6rem;
+    overflow: hidden;
+    margin-top: 2rem;
+  }
+  .tool {
+    background: var(--surface);
+    padding: 1rem 1.1rem .9rem;
+    display: block;
+  }
+  .tool a { color: inherit; }
+  .tool .nm { color: var(--accent); font-weight: 600; font-size: .92rem; }
+  .tool .ds { color: var(--dim); font-size: .78rem; line-height: 1.55; margin-top: .25rem; }
+  .tool:hover { background: var(--surface-2); }
+  .tool:hover .nm { color: var(--accent-bright); }
+  .org-note { margin-top: 1rem; font-size: .8rem; color: var(--muted); }
+  .org-note a { color: var(--dim); }
+
+  /* people */
+  .person {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr;
+    gap: 1.8rem;
+    align-items: start;
+  }
+  @media (max-width: 560px) { .person { grid-template-columns: 1fr; } }
+  .person img {
+    width: 7.5rem; height: 7.5rem; border-radius: .6rem;
+    border: 1px solid var(--border-2);
+    filter: saturate(.85) contrast(1.02);
+  }
+  .person h3 { margin-bottom: .5rem; }
+  .person .role-line { font-size: .78rem; color: var(--muted); margin-bottom: 1rem; letter-spacing: .04em; }
+  .person .role-line b { color: var(--violet); font-weight: 500; }
+  .labnote { margin-top: 2.4rem; max-width: 64ch; }
+  .joinbox {
+    margin-top: 2.2rem;
+    border: 1px solid var(--border); border-radius: .6rem;
+    background: var(--surface);
+    padding: 1.3rem 1.5rem;
+    max-width: 64ch;
+  }
+  .joinbox .jt { color: var(--fg); font-weight: 600; margin-bottom: .4rem; }
+  .joinbox p { font-size: .9rem; color: var(--dim); }
+
+  /* teaching */
+  .teach { border-top: 1px solid var(--border); }
+  .teach-row { display: grid; grid-template-columns: 8rem 1fr; gap: .2rem 1.4rem; padding: .8rem 0; }
+  .teach-row:last-child { border-bottom: 1px solid var(--border); }
+  .teach .what { color: var(--fg); }
+  .teach .what a { color: var(--fg); border-bottom-color: var(--border-2); }
+  .teach .when { color: var(--muted); font-size: .8rem; padding-top: .2em; }
+  .teach .note { color: var(--dim); font-size: .84rem; }
+  @media (max-width: 560px) { .teach-row { grid-template-columns: 1fr; gap: .1rem; } }
+
+  /* contact / footer */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1.6rem 2.4rem; margin-top: 1.6rem;
+  }
+  .contact-grid h4 {
+    font-size: .74rem; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--muted); font-weight: 500; margin-bottom: .6rem;
+  }
+  .contact-grid ul { list-style: none; }
+  .contact-grid li { font-size: .86rem; padding: .18rem 0; }
+  .contact-grid a { color: var(--dim); border-bottom-color: var(--border-2); }
+  .contact-grid a:hover { color: var(--accent); }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 0 3rem; margin-top: clamp(2.6rem, 7vw, 4.6rem);
+  }
+  .colophon {
+    display: flex; flex-wrap: wrap; gap: .6rem 2rem; justify-content: space-between;
+    font-size: .76rem; color: var(--muted);
+  }
+  .colophon a { color: var(--muted); border-bottom: none; }
+  .colophon a:hover { color: var(--accent); }
+
+  /* focus visibility */
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#top" aria-label="Living Codes Lab — top">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4.5 12 H19.5" class="g-backbone" style="stroke-width:1.8"/>
+        <path d="M9 12 Q12 5.5 15 12" class="g-bubble" style="stroke-width:1.8"/>
+        <circle cx="4.5" cy="12" r="2.6" fill="var(--accent)"/>
+        <circle cx="19.5" cy="12" r="2.6" fill="none" stroke="var(--accent)" stroke-width="1.6"/>
+        <circle cx="9" cy="12" r="1.7" fill="var(--bg)"/>
+        <circle cx="15" cy="12" r="1.7" fill="var(--bg)"/>
+      </svg>
+      <span class="name"><b>living</b>&hairsp;codes&hairsp;<b>lab</b></span>
+    </a>
+    <nav aria-label="Site">
+      <a href="#method" class="hide-s">method</a>
+      <a href="#work">work</a>
+      <a href="#people" class="hide-s">people</a>
+      <a href="#contact">contact</a>
+      <button id="themeBtn" title="theme: auto" aria-label="cycle color theme">◐</button>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ================= hero ================= -->
+  <div class="wrap hero">
+    <p class="kicker"><b>living codes lab</b> — university of tennessee health science center · memphis, tn &amp; the network</p>
+    <h1 class="display">Codes that <span class="t">live</span><br>are read <span class="v">together</span>.</h1>
+    <p class="lede">
+      We are the research group of <strong>Erik Garrison</strong>. Genomes are codes —
+      four letters deep and billions long — and for most of the history of genomics we
+      have read them one at a time, against a single privileged reference. We build
+      new representations of living systems: <strong>whole populations of complete
+      genomes</strong>, <strong>learning systems that grow out of sequence</strong>, and
+      <strong>science itself as an inspectable computational object</strong>.
+      When the inherited representation is blocking the view, we replace it — then
+      follow the consequences.
+    </p>
+    <p class="affil">
+      <a href="https://www.uthsc.edu/">UTHSC</a>
+      <span class="dot">department of genetics, genomics &amp; informatics</span>
+      <span class="dot">since 2020</span>
+    </p>
+
+    <div class="graphbox" role="img" aria-label="A pangenome graph: a linear path of sequence nodes with alternative paths arching over it">
+      <svg viewBox="0 0 640 130" xmlns="http://www.w3.org/2000/svg">
+        <path class="g-bubble g-bubble2" d="M150 90 Q205 22 260 90 Z"/>
+        <path class="g-bubble g-bubble2" d="M320 90 Q395 38 470 90 Z"/>
+        <path class="g-backbone" d="M30 90 H610"/>
+        <path class="g-bubble" d="M90 90 Q120 48 150 90"/>
+        <path class="g-bubble" d="M470 90 Q500 126 530 90"/>
+        <path class="g-bubble" d="M530 90 Q570 58 610 90"/>
+        <g>
+          <circle class="g-node" cx="30" cy="90" r="9"/><text class="g-letter" x="30" y="93" text-anchor="middle">a</text>
+          <circle class="g-node" cx="90" cy="90" r="9"/><text class="g-letter" x="90" y="93" text-anchor="middle">c</text>
+          <circle class="g-node" cx="150" cy="90" r="9"/><text class="g-letter" x="150" y="93" text-anchor="middle">g</text>
+          <circle class="g-node" cx="260" cy="90" r="9"/><text class="g-letter" x="260" y="93" text-anchor="middle">t</text>
+          <circle class="g-node" cx="320" cy="90" r="9"/><text class="g-letter" x="320" y="93" text-anchor="middle">a</text>
+          <circle class="g-node" cx="470" cy="90" r="9"/><text class="g-letter" x="470" y="93" text-anchor="middle">c</text>
+          <circle class="g-node" cx="530" cy="90" r="9"/><text class="g-letter" x="530" y="93" text-anchor="middle">g</text>
+          <circle class="g-node" cx="610" cy="90" r="9"/><text class="g-letter" x="610" y="93" text-anchor="middle">t</text>
+        </g>
+        <circle class="g-head" r="3.2" cx="30" cy="90"/>
+      </svg>
+      <p class="cap">fig. 0 — a pangenome graph: one relationship structure, many genomes read through it, nothing thrown away.</p>
+    </div>
+  </div>
+
+  <!-- ================= method ================= -->
+  <section id="method">
+    <div class="wrap">
+      <p class="slabel"><b>[01]</b> method</p>
+      <h2>Representation is a <em>scientific constraint</em>.</h2>
+      <div class="prose">
+        <p>
+          Every result in genetics arrives filtered through a representation. When the
+          filter destroys structure, the science goes blind in exactly the places the
+          interesting questions live. So the lab's recurring move is the same at every
+          scale of its work:
+        </p>
+        <p class="q">Do not throw away the structure too early.</p>
+        <p>
+          Twenty years of that move makes a chain, and each link removes an
+          inherited approximation:
+        </p>
+      </div>
+
+      <div class="chain">
+        <div class="chain-row">
+          <span class="chain-when">2011 →</span>
+          <span class="chain-what">
+            <span class="name"><a href="https://github.com/freebayes/freebayes">freebayes</a></span>
+            — <span class="old">nearby alleles are independent</span> ·
+            <span class="rule">infer variation as haplotypes</span>
+          </span>
+        </div>
+        <div class="chain-row">
+          <span class="chain-when">2015 →</span>
+          <span class="chain-what">
+            <span class="name"><a href="https://github.com/vgteam/vg">vg</a></span>
+            — <span class="old">one genome is coordinate truth</span> ·
+            <span class="rule">represent alternative complete sequence paths, as a graph</span>
+          </span>
+        </div>
+        <div class="chain-row">
+          <span class="chain-when">2021 →</span>
+          <span class="chain-what">
+            <span class="name"><a href="https://github.com/pangenome/pggb">pggb</a></span>
+            — <span class="old">one genome must be privileged</span> ·
+            <span class="rule">build pangenomes reference-free, from complete assemblies</span>
+          </span>
+        </div>
+        <div class="chain-row">
+          <span class="chain-when">2023 →</span>
+          <span class="chain-what">
+            <span class="name"><a href="https://github.com/pangenome/impg">impg</a></span>
+            — <span class="old">the graph must be materialized</span> ·
+            <span class="rule">the alignments themselves are the computational pangenome — make them queryable</span>
+          </span>
+        </div>
+        <div class="chain-row">
+          <span class="chain-when">2025 →</span>
+          <span class="chain-what">
+            <span class="name"><a href="https://github.com/pangenome/impop">impop</a></span>
+            — <span class="old">genomes become SNP matrices</span> ·
+            <span class="rule">population genetics over complete haplotype relationships</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="scales">
+        <span class="seq">genome <i>→</i> population <i>→</i> research group <i>→</i> organization</span><br>
+        The same question at every scale: what are the real entities, what are the
+        relationships, <strong>what do our abstractions destroy</strong> — and what becomes
+        possible when we keep more of the structure?
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= work ================= -->
+  <section id="work">
+    <div class="wrap">
+      <p class="slabel"><b>[02]</b> work</p>
+      <h2>Three directions, <em>one thread</em>.</h2>
+
+      <div class="dir">
+        <div class="dir-head"><span class="tag">02·a</span><h3>Population genetics after the linear reference</h3></div>
+        <div class="prose">
+          <p>
+            Thousands of complete genomes are becoming ordinary, and the field's
+            inference stack is still built to collapse them back into differences from
+            one reference. We are building the other stack:
+            <strong>IMPG</strong> makes all-versus-all alignments between assemblies
+            queryable without materializing a giant graph; <strong>impop</strong>
+            classifies sequence-sharing between genomes and paints ancestry and
+            pedigrees across complete haplotypes; <strong>COSIGT</strong> genotypes
+            complex loci at population scale from low-coverage sequencing — conceived
+            here, developed with Davide Bolognini and Andrea Guarracino.
+          </p>
+          <p>
+            The same substrate keeps revealing biology the linear reference had hidden:
+            exchange between acrocentric chromosomes, the formation and propagation of
+            Robertsonian chromosomes, the concerted evolution of subtelomeres.
+          </p>
+        </div>
+        <p class="links">
+          <a class="lk" href="https://github.com/pangenome/impg">impg</a>
+          <a class="lk" href="https://github.com/pangenome/impop">impop</a>
+          <a class="lk" href="https://github.com/davidebolo1993/cosigt">cosigt</a>
+          <a class="lk" href="https://github.com/pangenome/HPRCv2">HPRCv2 build</a>
+          <a class="lk" href="https://humanpangenome.org">human pangenome reference consortium</a>
+        </p>
+      </div>
+
+      <div class="dir">
+        <div class="dir-head"><span class="tag">02·b</span><h3>Learning over complete biological sequence</h3></div>
+        <div class="prose">
+          <p>
+            Representation is a constraint in machine learning too.
+            <strong>Emender</strong> is a family of recurrent language models built
+            from many small nonlinear matrix memories — a nonlinear delta-memory
+            mechanism. Each memory head reads time sequentially, but hundreds of heads
+            run in parallel across the GPU on a fused Triton kernel, which lets the
+            recurrence train at billion-parameter scale: the opposite route from
+            attention, taken seriously.
+          </p>
+          <p>
+            The longer aim is learning systems whose native object is complete
+            biological sequence — populations of genomes as they are, not as flattened
+            feature tables.
+          </p>
+        </div>
+        <p class="links">
+          <a class="lk" href="https://github.com/spinozans/emender">emender</a>
+          <a class="lk" href="https://huggingface.co/spinozans">models on hugging face</a>
+        </p>
+      </div>
+
+      <div class="dir">
+        <div class="dir-head"><span class="tag">02·c</span><h3>Science as a computational object</h3></div>
+        <div class="prose">
+          <p>
+            Scientific work has an inherited representation as well — notebooks, meetings,
+            chat threads, tacit knowledge in people's heads — and it destroys the
+            structure that makes work verifiable. <strong>wg</strong> is an open-source
+            coordination graph in which humans and AI agents work in one dependency
+            graph: claims, handoffs, execution logs, artifacts, and histories preserved
+            for review. Around it we co-founded <strong>Poietic PBC</strong>, a
+            public-benefit company, with Luca Pinello (MGH/Harvard/Broad) and Vaughn
+            Tan (UCL). This lab runs on it.
+          </p>
+          <p>
+            Call it the social science inside of our science.
+          </p>
+        </div>
+        <p class="links">
+          <a class="lk" href="https://github.com/graphwork/wg">wg</a>
+          <a class="lk" href="https://poietic.life">poietic</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= findings ================= -->
+  <section id="findings">
+    <div class="wrap">
+      <p class="slabel"><b>[03]</b> findings</p>
+      <h2>What the new views <em>made visible</em>.</h2>
+      <div class="prose" style="margin-bottom: 2rem;">
+        <p>Selected results, 2023–2026. The representation work is infrastructure;
+        these are some of the things it let us — and our collaborators — see.</p>
+      </div>
+
+      <div class="pub">
+        <div class="row1">
+          <span class="t"><a href="https://doi.org/10.64898/2026.07.21.739710">HPRC2: a human pangenome reference with near-complete coverage of common genetic variation</a></span>
+          <span class="venue">bioRxiv <span class="yr">2026</span></span>
+        </div>
+        <p class="role">co-corresponding, with Benedict Paten</p>
+      </div>
+      <div class="pub">
+        <div class="row1">
+          <span class="t"><a href="https://doi.org/10.64898/2026.07.10.737660">Concerted evolution and unorthodox recombination of human subtelomeres</a></span>
+          <span class="venue">bioRxiv <span class="yr">2026</span></span>
+        </div>
+        <p class="role">corresponding, with Andrea Guarracino</p>
+      </div>
+      <div class="pub">
+        <div class="row1">
+          <span class="t"><a href="https://doi.org/10.1186/s13059-026-04242-4">COSIGT: population-scalable genotyping of complex loci from low-coverage sequencing data using pangenome graphs</a></span>
+          <span class="venue">Genome Biology <span class="yr">2026</span></span>
+        </div>
+        <p class="role">conceived &amp; co-supervised; software by D. Bolognini and A. Guarracino</p>
+      </div>
+      <div class="pub">
+        <div class="row1">
+          <span class="t"><a href="https://doi.org/10.1038/s41586-025-09540-8">The formation and propagation of human Robertsonian chromosomes</a></span>
+          <span class="venue">Nature <span class="yr">2025</span></span>
+        </div>
+        <p class="role">co-corresponding; co-conceived &amp; co-supervised with L. Gomes de Lima, J. Gerton</p>
+      </div>
+      <div class="pub">
+        <div class="row1">
+          <span class="t"><a href="https://doi.org/10.1126/science.adw1931">Multispecies pangenomes reveal a pervasive influence of population size on structural variation</a></span>
+          <span class="venue">Science <span class="yr">2025</span></span>
+        </div>
+        <p class="role">co-author, with the VGP and consortium colleagues</p>
+      </div>
+      <div class="pub">
+        <div class="row1">
+          <span class="t"><a href="https://doi.org/10.1038/s41592-024-02430-3">Building pangenome graphs</a></span>
+          <span class="venue">Nature Methods <span class="yr">2024</span></span>
+        </div>
+        <p class="role">first-listed equal contributor with A. Guarracino · corresponding</p>
+      </div>
+      <div class="pub">
+        <div class="row1">
+          <span class="t"><a href="https://doi.org/10.1038/s41586-024-07911-1">Recurrent evolution and selection shape structural diversity at the amylase locus</a></span>
+          <span class="venue">Nature <span class="yr">2024</span></span>
+        </div>
+        <p class="role">co-corresponding, with P. Sudmant</p>
+      </div>
+      <div class="pub">
+        <div class="row1">
+          <span class="t"><a href="https://doi.org/10.1038/s41586-023-05896-x">A draft human pangenome reference</a></span>
+          <span class="venue">Nature <span class="yr">2023</span></span>
+        </div>
+        <p class="role">co-corresponding, with Benedict Paten · the Human Pangenome Reference Consortium</p>
+      </div>
+      <div class="pub">
+        <div class="row1">
+          <span class="t"><a href="https://doi.org/10.1038/s41586-023-05976-y">Recombination between heterologous human acrocentric chromosomes</a></span>
+          <span class="venue">Nature <span class="yr">2023</span></span>
+        </div>
+        <p class="role">corresponding</p>
+      </div>
+
+      <p class="pub-note">
+        Full record on <a href="https://scholar.google.com/citations?user=d5TKoncAAAAJ">Google Scholar</a>
+        — including the vg toolkit, ODGI, FreeBayes and vcflib papers, and work with the
+        1000 Genomes, T2T, and Vertebrate Genomes projects.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= tools ================= -->
+  <section id="tools">
+    <div class="wrap">
+      <p class="slabel"><b>[04]</b> instruments</p>
+      <h2>The tools we build <em>are the papers</em>.</h2>
+      <div class="prose">
+        <p>Our software is maintained in the open, and it is where most of the group's
+        effort lives. A partial cabinet:</p>
+      </div>
+
+      <div class="tools">
+        <a class="tool" href="https://github.com/freebayes/freebayes"><span class="nm">freebayes</span><span class="ds">haplotype-based Bayesian variant detection</span></a>
+        <a class="tool" href="https://github.com/vcflib/vcflib"><span class="nm">vcflib</span><span class="ds">the toolbox for the variant call format</span></a>
+        <a class="tool" href="https://github.com/vgteam/vg"><span class="nm">vg</span><span class="ds">genomic analysis on sequence variation graphs</span></a>
+        <a class="tool" href="https://github.com/waveygang/wfmash"><span class="nm">wfmash</span><span class="ds">approximate whole-genome alignment</span></a>
+        <a class="tool" href="https://github.com/pangenome/seqwish"><span class="nm">seqwish</span><span class="ds">induce variation graphs from alignments</span></a>
+        <a class="tool" href="https://github.com/pangenome/smoothxg"><span class="nm">smoothxg</span><span class="ds">simplify and linearize graph regions</span></a>
+        <a class="tool" href="https://github.com/pangenome/pggb"><span class="nm">pggb</span><span class="ds">the pangenome graph builder pipeline</span></a>
+        <a class="tool" href="https://github.com/pangenome/odgi"><span class="nm">odgi</span><span class="ds">understand and explore pangenome graphs</span></a>
+        <a class="tool" href="https://github.com/pangenome/impg"><span class="nm">impg</span><span class="ds">implicit pangenomes: query the alignments</span></a>
+        <a class="tool" href="https://github.com/pangenome/impop"><span class="nm">impop</span><span class="ds">population genetics over complete genomes</span></a>
+        <a class="tool" href="https://github.com/graphwork/wg"><span class="nm">wg</span><span class="ds">the work graph: humans and agents, one dependency graph</span></a>
+        <a class="tool" href="https://github.com/spinozans/emender"><span class="nm">emender</span><span class="ds">recurrent models from nonlinear delta memories</span></a>
+      </div>
+
+      <p class="org-note">
+        Most of it lives under the
+        <a href="https://github.com/pangenome">pangenome</a> organization, with spinouts in
+        <a href="https://github.com/freebayes">freebayes</a>,
+        <a href="https://github.com/vgteam">vgteam</a>,
+        <a href="https://github.com/waveygang">waveygang</a>,
+        <a href="https://github.com/spinozans">spinozans</a> and
+        <a href="https://github.com/graphwork">graphwork</a>.
+      </p>
+    </div>
+  </section>
+
+  <!-- ================= people ================= -->
+  <section id="people">
+    <div class="wrap">
+      <p class="slabel"><b>[05]</b> people</p>
+      <h2>A small lab, <em>hands on</em>.</h2>
+
+      <div class="person">
+        <img src="assets/ekg.jpg" alt="Erik Garrison" width="120" height="120" loading="lazy">
+        <div>
+          <h3>Erik Garrison</h3>
+          <p class="role-line"><b>principal investigator</b> · he/him · memphis &amp; the network</p>
+          <div class="prose">
+            <p>
+              Tenured associate professor of Genetics, Genomics &amp; Informatics at the
+              University of Tennessee Health Science Center. PhD in genomics at the
+              University of Cambridge / Wellcome Sanger Institute — <em>Graphical
+              pangenomics</em>, with Richard Durbin — after beginning FreeBayes in
+              Gabor Marth's lab at Boston College and working on production and
+              analysis for the 1000 Genomes Project. Before that: Harvard, social
+              studies — the detour that later became the return. Co-chair of the
+              Pangenomes Working Group, Human Pangenome Reference Consortium.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="labnote prose">
+        <p>
+          Around the PI: a deliberately small, distributed group of doctoral students,
+          postdocs, and close collaborators across institutions. The lab is physical at
+          UTHSC in Memphis and virtual everywhere else. It runs on
+          <a href="https://github.com/graphwork/wg">wg</a> — the work is meant to be
+          inspectable by design.
+        </p>
+      </div>
+
+      <div class="joinbox">
+        <p class="jt">join the lab</p>
+        <p>
+          We take people who want to build the missing thing. Doctoral students,
+          postdocs, and unusual collaborations all start the same way:
+          write to <a href="mailto:erik.garrison@gmail.com">erik.garrison@gmail.com</a>
+          and tell us what you want to make visible.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= teaching ================= -->
+  <section id="teaching">
+    <div class="wrap">
+      <p class="slabel"><b>[06]</b> teaching</p>
+      <h2>We teach people to <em>read genomes together</em>.</h2>
+      <div class="teach">
+        <div class="teach-row">
+          <span class="when">2023 · 2025</span>
+          <span><span class="what">Computational Pangenomics in Memphis (MemPang)</span> — <span class="note">course lead &amp; instructor; the 2025 edition supported by EMBO</span></span>
+        </div>
+        <div class="teach-row">
+          <span class="when">2026</span>
+          <span><span class="what"><a href="https://github.com/pangenome/embo-pangenomics-2026">EMBO practical course: pangenomics</a></span> — <span class="note">organizing faculty</span></span>
+        </div>
+        <div class="teach-row">
+          <span class="when">2023 →</span>
+          <span><span class="what"><a href="https://evomics.org/">Workshop on Genomics (evomics)</a></span> — <span class="note">instructor, variant calling &amp; pangenomics, Český Krumlov</span></span>
+        </div>
+        <div class="teach-row">
+          <span class="when">2023 → 2026</span>
+          <span><span class="what">Cold Spring Harbor Laboratory, computational genomics</span> — <span class="note">invited lecturer on pangenomics and genome variation</span></span>
+        </div>
+        <div class="teach-row">
+          <span class="when">2018 · 2019 · 2022</span>
+          <span><span class="what">Instituto Gulbenkian de Ciência</span> — <span class="note">computational pangenomics courses</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= contact ================= -->
+  <section id="contact">
+    <div class="wrap">
+      <p class="slabel"><b>[07]</b> contact</p>
+      <h2>Write, fork, or <em>follow the work</em>.</h2>
+      <div class="contact-grid">
+        <div>
+          <h4>direct</h4>
+          <ul>
+            <li><a href="mailto:erik.garrison@gmail.com">erik.garrison@gmail.com</a></li>
+            <li><a href="https://github.com/ekg">github.com/ekg</a></li>
+            <li><a href="https://scholar.google.com/citations?user=d5TKoncAAAAJ">google scholar</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>organizations</h4>
+          <ul>
+            <li><a href="https://github.com/pangenome">pangenome</a></li>
+            <li><a href="https://github.com/spinozans">spinozans</a></li>
+            <li><a href="https://github.com/graphwork">graphwork</a></li>
+            <li><a href="https://github.com/freebayes">freebayes</a></li>
+            <li><a href="https://github.com/vgteam">vgteam</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>adjacent</h4>
+          <ul>
+            <li><a href="https://poietic.life">poietic.life</a> — the science-of-work program</li>
+            <li><a href="https://humanpangenome.org">humanpangenome.org</a></li>
+            <li><a href="https://www.uthsc.edu/">uthsc.edu</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap colophon">
+    <span>living codes lab · living.codes · memphis, tennessee &amp; the network</span>
+    <span>
+      a single static page, on purpose —
+      <a href="https://github.com/ekg">view source on github</a> ·
+      heavier things live on subdomains
+    </span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var btn = document.getElementById('themeBtn');
+  var order = ['auto', 'dark', 'light'];
+  var icon = { auto: '◐', dark: '●', light: '○' };
+  var label = { auto: 'theme: auto', dark: 'theme: dark', light: 'theme: light' };
+
+  function current() {
+    var t = document.documentElement.dataset.theme || 'auto';
+    return order.indexOf(t) === -1 ? 'auto' : t;
+  }
+  function render() {
+    var t = current();
+    btn.textContent = icon[t];
+    btn.title = label[t];
+    btn.setAttribute('aria-label', label[t]);
+  }
+  btn.addEventListener('click', function () {
+    var next = order[(order.indexOf(current()) + 1) % order.length];
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('lc-theme', next); } catch (e) {}
+    render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
